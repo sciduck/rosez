@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+   
+   <!-- map server  -->
+   <node 
+    name="map_server" 
+    pkg="map_server" 
+    type="map_server" 
+    args="$(find nav_pkg)/maps/mymap.pgm mymap_resolution"/>
+ 
+   <!-- for filtered odom -->
+   <include file="$(find nav_pkg)/launch/amcl.launch" />
+
+   <!-- move base package http://wiki.ros.org/move_base -->
+   <node 
+    pkg="move_base" 
+    type="move_base" 
+    respawn="false" 
+    name="move_base" 
+    output="screen">
+
+    <rosparam 
+      file="$(find nav_pkg)/config/costmap_common_params.yaml" 
+      command="load" 
+      ns="global_costmap"/> 
+
+    <rosparam 
+      file="$(find nav_pkg)/config/costmap_common_params.yaml" 
+      command="load" 
+      ns="local_costmap" />
+
+    <rosparam 
+      file="$(find nav_pkg)/config/local_costmap_params.yaml" 
+      command="load" />
+
+    <rosparam 
+      file="$(find nav_pkg)/config/global_costmap_params.yaml" 
+      command="load" /> 
+
+    <rosparam 
+      file="$(find nav_pkg)/config/base_local_planner_params.yaml" 
+      command="load" />
+    <rosparam 
+      file="$(find nav_pkg)/config/base_local_plan ner_params.yaml" 
+      command="load" />
+
+ </node>
+
+</launch> 
