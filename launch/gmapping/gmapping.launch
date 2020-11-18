@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<launch>
+
+<!-- bring up robot -->
+  <include file="$(find robot_description)/launch/robot_description.launch" />
+
+<!-- robot state publisher -->
+  <node 
+    pkg="robot_state_publisher" 
+    type="robot_state_publisher" 
+    name="robot_state_publisher" 
+    />
+
+<!-- joint state publisher -->
+  <node 
+    name="joint_state_publisher" 
+    pkg="joint_state_publisher" 
+    type="joint_state_publisher" 
+  />
+
+<!-- start rviz -->
+  <node 
+    pkg="rviz" 
+    type="rviz" 
+    name="rviz" 
+    args="-d $(find robot_gmapping)/rviz/mapping.rviz" 
+  />
+
+<!-- start teleop -->
+  <node 
+  	pkg="teleop_twist_keyboard" 
+  	type="teleop_twist_keyboard.py" 
+  	name="teleop_node" output="screen" 
+  	launch-prefix="gnome-terminal --command"
+  	/> 
+
+<!-- set arguments -->
+  <arg name="scan_topic"  default="/robot/laser/scan" />
+  <arg name="base_frame"  default="robot_base" />
+  <arg name="odom_frame"  default="odom" />
+  <arg name="map_frame"   default="map" />
+  <remap from="scan" to="$(arg scan_topic)"/>
+
+<!-- start gmapping node -->
+  <node 
+  	pkg="gmapping" 
+  	type="slam_gmapping" 
+  	name="slam_gmapping" 
+  	output="screen" >
+
+  	<!-- parameters -->
+    <param name="inverted_laser" value="false" />
+    <param name="throttle_scans" value="1" />
+    
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="map_frame" value="$(arg map_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+
+    <param name="map_update_interval" value="5.0"/>
+    <param name="maxUrange" value="80.0"/>
+    <param name="sigma" value="0.05"/>
+    <param name="kernelSize" value="1"/>
+    <param name="lstep" value="0.05"/>
+    <param name="astep" value="0.05"/>
+    <param name="iterations" value="5"/>
+    <param name="lsigma" value="0.075"/>  
+    <param name="ogain" value="3.0"/>
+    <param name="lskip" value="0"/>
+    <param name="minimumScore" value="0.0"/>
+    <param name="srr" value="0.1"/>
+    <param name="srt" value="0.2"/>
+    <param name="str" value="0.1"/>
+    <param name="stt" value="0.2"/>
+    <param name="linearUpdate" value="1.0"/>
+    <param name="angularUpdate" value="0.5"/>
+    <param name="temporalUpdate" value="-1.0"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="particles" value="30"/>
+
+    <!-- will affect computation memory -->
+    <!-- <param name="xmin" value="-50.0"/> -->
+    <!-- <param name="ymin" value="-50.0"/> -->
+    <!-- <param name="xmax" value="50.0"/> -->
+    <!-- <param name="ymax" value="50.0"/> -->
+    <param name="xmin" value="-100.0"/>
+    <param name="ymin" value="-100.0"/>
+    <param name="xmax" value="100.0"/>
+    <param name="ymax" value="100.0"/>
+
+    <param name="delta" value="0.05"/>
+    <param name="llsamplerange" value="0.01"/>
+    <param name="llsamplestep" value="0.01"/>
+    <param name="lasamplerange" value="0.005"/>
+    <param name="lasamplestep" value="0.005"/>
+	<param name="transform_publish_period" value="0.05" />
+	<param name="occ_thresh" value="0.25" />
+    <param name="maxRange" value="8.0"/>
+  </node>
+
+</launch>
+
+<!-- 
+
+subscribed topics
+tf (tf/tfMessage)
+scan (sensor_msgs/LaserScan)
+
+published Topics
+map_metadata (nav_msgs/MapMetaData)
+map (nav_msgs/OccupancyGrid)
+~entropy (std_msgs/Float64)
+
+required tf transforms
+<the frame attached to incoming scans> → base_link
+base_link → odom
+
+provided tf transforms
+map → odom
+
+ -->
+
+
